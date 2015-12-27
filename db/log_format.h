@@ -3,6 +3,12 @@
 
 namespace easydb {
 
+enum ValueType 
+{
+    kTypeDeletion = 0x0,
+    kTypeValue = 0x1 
+};
+
 enum RecordType {
   // Zero is reserved for preallocated files
   kZeroType = 0,

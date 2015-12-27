@@ -15,6 +15,8 @@ class SequentialFile {
   SequentialFile(const std::string& fname);
   virtual ~SequentialFile();
 
+  bool IsValid();
+
   // Read up to "n" bytes from the file.  "scratch[0..n-1]" may be
   // written by this routine.  Sets "*result" to the data that was
   // read (including if fewer than "n" bytes were successfully read).
@@ -47,6 +49,8 @@ class WritableFile {
  public:
   WritableFile(const std::string& fname);
   virtual ~WritableFile();
+
+  bool IsValid();
 
   Status Append(const Slice& data);
  private:

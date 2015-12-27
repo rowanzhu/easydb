@@ -26,6 +26,17 @@ SequentialFile::~SequentialFile()
     }
 }
 
+bool SequentialFile::IsValid()
+{
+    if(NULL == file_)
+    {
+        return false;
+    }else
+    {
+        return true;
+    }
+}
+
 Status SequentialFile::Read(size_t n, Slice* result, char* scratch)
 {
     if(NULL == file_)
@@ -65,7 +76,7 @@ Status SequentialFile::Skip(uint64_t n)
 WritableFile::WritableFile(const std::string& fname)
     :filename_(fname), fd_(-1)
 {
-    fd_ = open(fname.c_str(), O_WRONLY|O_CREAT|O_APPEND|O_SYNC);
+    fd_ = open(fname.c_str(), O_WRONLY|O_CREAT|O_TRUNC|O_SYNC);
 }
 
 WritableFile::~WritableFile()
@@ -73,6 +84,17 @@ WritableFile::~WritableFile()
     if(fd_ > 0)
     {
         close(fd_);
+    }
+}
+
+bool WritableFile::IsValid()
+{
+    if(fd_ < 0)
+    {
+        return false;
+    }else
+    {
+        return true;
     }
 }
 
