@@ -25,7 +25,7 @@ Status DB::Open(const Options& options, const std::string& dbname, DB** dbptr)
 }
 
 
-
+    
 DBImpl::DBImpl(const Options& options, const std::string& dbname)
     :options_(options),
     dbname_(dbname),
@@ -36,6 +36,15 @@ DBImpl::DBImpl(const Options& options, const std::string& dbname)
 
 DBImpl::~DBImpl()
 {
+    if(NULL != p_log_writer_)
+    {
+        delete p_log_writer_;
+    }
+
+    if(NULL != p_writable_file_)
+    {
+        delete p_writable_file_;
+    }
 }
 
 Status DBImpl::Put(const WriteOptions&, const Slice& key, const Slice& value)
@@ -52,6 +61,15 @@ Status DBImpl::Put(const WriteOptions&, const Slice& key, const Slice& value)
 
 Status DBImpl::Recover()
 {
+    if(!FileExists(dbname_))
+    {
+        Status s = CreateDir(dbname_);
+        if(!s.ok())
+        {
+            return s;
+        }
+    }
+    
     std::string str_full_log_0_name(dbname_);
     str_full_log_0_name.append("/");
     str_full_log_0_name.append(DB_FILE_NAME_LOG_0);
@@ -66,5 +84,7 @@ Status DBImpl::Recover()
     
     return Status::OK();
 }
+
+
 
 }

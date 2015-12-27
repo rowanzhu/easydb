@@ -79,6 +79,10 @@ class Logger {
   void operator=(const Logger&);
 };
 
+
+Status CreateDir(const std::string& name);
+bool FileExists(const std::string& fname);
+
 }
 
 #endif

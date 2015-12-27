@@ -76,7 +76,7 @@ Status SequentialFile::Skip(uint64_t n)
 WritableFile::WritableFile(const std::string& fname)
     :filename_(fname), fd_(-1)
 {
-    fd_ = open(fname.c_str(), O_WRONLY|O_CREAT|O_TRUNC|O_SYNC);
+    fd_ = open(fname.c_str(), O_WRONLY|O_CREAT|O_TRUNC|O_SYNC, 0644);
 }
 
 WritableFile::~WritableFile()
@@ -128,6 +128,22 @@ Logger::~Logger()
 void Logger::Logv(const char* format, va_list ap)
 {
 
+}
+
+
+Status CreateDir(const std::string& name) 
+{
+    Status result;
+    int ret = mkdir(name.c_str(), 0755);
+    if (ret != 0) {
+        result = Status::IOError(name, strerror(errno));
+    }   
+    return result;
+}
+
+bool FileExists(const std::string& fname) 
+{
+    return access(fname.c_str(), F_OK) == 0;
 }
 
 }
