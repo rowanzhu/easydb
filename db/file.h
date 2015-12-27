@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <string>
+#include <vector>
 #include "easydb/status.h"
 
 namespace easydb
@@ -82,6 +83,10 @@ class Logger {
 
 Status CreateDir(const std::string& name);
 bool FileExists(const std::string& fname);
+Status ReadDir(const std::string& dir, std::vector<std::string>* result);
+Status DeleteFile(const std::string& fname);
+Status GetFileSize(const std::string& fname, uint64_t* size);
+Status RenameFile(const std::string& src, const std::string& target);
 
 }
 
