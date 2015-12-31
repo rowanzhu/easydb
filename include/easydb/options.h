@@ -7,7 +7,12 @@ namespace easydb {
 
 // Options to control the behavior of a database (passed to DB::Open)
 struct Options {
-  
+    uint64_t max_log_file_size;
+
+    Options()
+        :max_log_file_size(104857600) //100M
+    {
+    }
 };
 
 // Options that control read operations

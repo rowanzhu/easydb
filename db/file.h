@@ -52,6 +52,8 @@ class WritableFile {
   virtual ~WritableFile();
 
   bool IsValid();
+  uint64_t GetFileSize();
+  const std::string &GetFileName();
 
   Status Append(const Slice& data);
  private:
@@ -80,6 +82,13 @@ class Logger {
   void operator=(const Logger&);
 };
 
+enum FileType {
+    kUnknownFile = 0,
+    kLogFile,      //num.log
+    kMergingFile,  //num_num_num[_num_...].mgi
+    kMergedFile    //num_num_num[_num_...].mgd
+};
+
 
 Status CreateDir(const std::string& name);
 bool FileExists(const std::string& fname);
@@ -87,6 +96,7 @@ Status ReadDir(const std::string& dir, std::vector<std::string>* result);
 Status DeleteFile(const std::string& fname);
 Status GetFileSize(const std::string& fname, uint64_t* size);
 Status RenameFile(const std::string& src, const std::string& target);
+int ParseFileName(const std::string& fname, FileType* type, std::vector<uint32_t> *vec_num);
 
 }
 

@@ -23,11 +23,16 @@ class DBImpl : public DB {
   std::string dbname_; //dir name
   LogWriter *p_log_writer_;
   WritableFile *p_writable_file_;
+  uint32_t max_filename_num_;
 
  private:
   // No copying allowed
   DBImpl(const DBImpl&);
   void operator=(const DBImpl&);
+
+  void ScanDir();
+  void GetNewLogFileName(std::string &ret);
+  void GetFullFileName(std::string &file_name);
 };
 
 }  

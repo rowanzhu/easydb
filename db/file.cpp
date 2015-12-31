@@ -104,6 +104,18 @@ bool WritableFile::IsValid()
     }
 }
 
+uint64_t WritableFile::GetFileSize()
+{
+    uint64_t file_size = 0;
+    easydb::GetFileSize(filename_, &file_size);
+    return file_size;
+}
+
+const std::string &WritableFile::GetFileName()
+{
+    return filename_;
+}
+
 Status WritableFile::Append(const Slice& data)
 {
     if(fd_ < 0)
@@ -197,6 +209,50 @@ Status RenameFile(const std::string& src, const std::string& target)
         result = IOError(src, errno);
     }
     return result;
+}
+
+int ParseFileName(const std::string& fname, FileType* type, std::vector<uint32_t> *vec_num)
+{
+    Slice rest(fname);
+    *type = kUnknownFile;
+    vec_num->clear();
+
+    std::string str_num;
+    while (!rest.empty()) 
+    {
+        char c = rest[0];
+        if(c == '_')
+        {
+            vec_num->push_back(atoi(str_num.c_str()));
+            str_num.clear();
+        }
+        else if(c == '.')
+        {
+            vec_num->push_back(atoi(str_num.c_str()));
+            str_num.clear();
+            break;
+        }
+        else
+        {
+            str_num.append(1, c);
+        }
+        rest.remove_prefix(1);
+    }
+
+    if(rest == Slice(".log"))
+    {
+        *type = kLogFile;
+    }
+    else if(rest == Slice(".mgi"))
+    {
+        *type = kMergingFile;
+    }
+    else if(rest == Slice(".mgd"))
+    {
+        *type = kMergedFile;
+    }
+
+    return 0;
 }
 
 }
