@@ -2,6 +2,7 @@
 #include "log_writer.h"
 #include "file.h"
 #include "coding.h"
+#include "log_reader.h"
 
 namespace easydb {
 
@@ -11,6 +12,57 @@ static time_t Now()
 {
     return time(NULL);
 }
+
+Status GetAllFromOneFile(const std::string &file_name, 
+        std::map<std::string, std::string> &map_all_kv)
+{
+    Status s;
+    
+    SequentialFile log_file(file_name);
+    if(!log_file.IsValid())
+    {
+        return Status::IOError(file_name, "invalid fd");
+    }
+
+    LogReader::Reporter reporter;
+
+    LogReader log_reader(&log_file, &reporter, true, 0);
+
+    std::string scratch;
+    Slice record;
+    Slice key;
+    Slice value;
+    while (log_reader.ReadRecord(&record, &scratch))
+    {
+        char tag = record[0];
+        record.remove_prefix(1);
+
+        switch(tag)
+        {
+            case kTypeValue:
+            {
+                if(GetLengthPrefixedSlice(&record, &key) &&
+                        GetLengthPrefixedSlice(&record, &value))
+                {
+                    map_all_kv[key.ToString()] = value.ToString();
+                }
+            }
+            break;
+            case kTypeDeletion:
+            {
+                //TODO:
+            }
+            break;
+            default:
+            {
+                //return Status::Corruption("unknown record tag");
+            }
+        }
+    }
+
+    return s;
+}
+
 
 Status DB::Open(const Options& options, const std::string& dbname, DB** dbptr)
 {
@@ -102,6 +154,60 @@ Status DBImpl::Put(const WriteOptions&, const Slice& key, const Slice& value)
         p_log_writer_ = new LogWriter(p_writable_file_);
     }
     
+    return s;
+}
+
+Status DBImpl::GetAll(std::map<std::string, std::string> &map_all_kv)
+{
+    map_all_kv.clear();
+    Status s;
+
+    std::vector<std::string> file_list;
+    ReadDir(dbname_, &file_list);
+
+    std::map< uint32_t, std::string* > sorted_file_map;
+    for(int i = 0; i < file_list.size(); ++i)
+    {
+        if(file_list[i] == "." || 
+                file_list[i] == ".." ||
+                file_list[i] == DB_FILE_NAME_LOG_0)
+        {
+            continue;
+        }
+        
+        FileType file_type = kUnknownFile;
+        std::vector<uint32_t> vec_num;
+        ParseFileName(file_list[i], &file_type, &vec_num);
+
+        switch(file_type)
+        {
+            case kLogFile:
+            {
+                //SetMaxFilenameNum
+                if(vec_num.size() > 0)
+                {
+                    sorted_file_map[vec_num[0]] = &(file_list[i]);
+                }
+            }
+            break;
+            default:
+            {
+            }
+        }
+    }
+
+    std::map< uint32_t, std::string* >::iterator iter;
+    for(iter = sorted_file_map.begin(); iter != sorted_file_map.end(); ++iter)
+    {
+        std::string *p_str_file_name = iter->second;
+        GetFullFileName(*p_str_file_name);
+        GetAllFromOneFile(*p_str_file_name, map_all_kv);
+    }
+    
+    std::string str_full_log_0_name(DB_FILE_NAME_LOG_0);
+    GetFullFileName(str_full_log_0_name);
+    GetAllFromOneFile(str_full_log_0_name, map_all_kv);
+
     return s;
 }
 

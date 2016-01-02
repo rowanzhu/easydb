@@ -4,15 +4,13 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string>
+#include <map>
 #include "easydb/options.h"
 #include "easydb/slice.h"
 #include "easydb/status.h"
 
 namespace easydb {
 
-// A DB is a persistent ordered map from keys to values.
-// A DB is safe for concurrent access from multiple threads without
-// any external synchronization.
 class DB {
  public:
   // Open the database with the specified "name".
@@ -32,6 +30,9 @@ class DB {
   virtual Status Put(const WriteOptions& options,
                      const Slice& key,
                      const Slice& value) = 0;
+
+  //Get all key-value in the database
+  virtual Status GetAll(std::map<std::string, std::string> &map_all_kv) = 0;
 
  private:
   // No copying allowed

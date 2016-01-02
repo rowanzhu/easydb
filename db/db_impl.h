@@ -17,6 +17,7 @@ class DBImpl : public DB {
 
   // Implementations of the DB interface
   virtual Status Put(const WriteOptions&, const Slice& key, const Slice& value);
+  virtual Status GetAll(std::map<std::string, std::string> &map_all_kv);
 
   Status Recover();
  private:
@@ -36,6 +37,10 @@ class DBImpl : public DB {
   void GetNewLogFileName(std::string &ret);
   void GetFullFileName(std::string &file_name);
 };
+
+
+Status GetAllFromOneFile(const std::string &file_name, 
+        std::map<std::string, std::string> &map_all_kv);
 
 }  
 
