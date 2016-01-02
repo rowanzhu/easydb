@@ -3,6 +3,7 @@
 
 #include "easydb/db.h"
 #include <string>
+#include <ctime>
 
 namespace easydb {
 
@@ -24,6 +25,7 @@ class DBImpl : public DB {
   LogWriter *p_log_writer_;
   WritableFile *p_writable_file_;
   uint32_t max_filename_num_;
+  time_t last_file_sync_ts_;
 
  private:
   // No copying allowed

@@ -8,7 +8,7 @@ int main()
 {
     DB *p_db = NULL;
     Options opt;
-    opt.max_log_file_size = 100;
+    //opt.max_log_file_size = 100;
     Status s = DB::Open(opt, "./db_test", &p_db);
 
     if(NULL == p_db)

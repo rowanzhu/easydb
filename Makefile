@@ -88,6 +88,9 @@ merge_tool: merge_tool/main.o $(LIBOBJECTS)
 test_1: test/main.o 
 	$(CXX) $(LDFLAGS) test/main.o $(LIBRARY) -o test/$@ 
 
+benchmark: benchmark/benchmark.o 
+	$(CXX) $(LDFLAGS) benchmark/benchmark.o $(LIBRARY) -o benchmark/$@ 
+
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@

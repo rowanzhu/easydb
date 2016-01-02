@@ -82,7 +82,11 @@ Status SequentialFile::Skip(uint64_t n)
 WritableFile::WritableFile(const std::string& fname)
     :filename_(fname), fd_(-1)
 {
+#if defined(EASYDB_FILE_SYNC_ON_WRITE)
     fd_ = open(fname.c_str(), O_WRONLY|O_CREAT|O_TRUNC|O_SYNC, 0644);
+#elif defined(EASYDB_FILE_SYNC_ON_DEMAND)
+    fd_ = open(fname.c_str(), O_WRONLY|O_CREAT|O_TRUNC, 0644);
+#endif
 }
 
 WritableFile::~WritableFile()
@@ -129,6 +133,16 @@ Status WritableFile::Append(const Slice& data)
         return Status::IOError(filename_, strerror(errno));
     }
     return Status::OK();
+}
+
+Status WritableFile::Sync()
+{
+    Status s;
+    if(fdatasync(fd_) != 0)
+    {
+        s = Status::IOError(filename_, strerror(errno));
+    }
+    return s;
 }
 
 

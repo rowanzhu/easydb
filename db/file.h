@@ -9,6 +9,8 @@
 namespace easydb
 {
 
+#define EASYDB_FILE_SYNC_ON_DEMAND
+
 class Slice;
 
 class SequentialFile {
@@ -56,6 +58,7 @@ class WritableFile {
   const std::string &GetFileName();
 
   Status Append(const Slice& data);
+  Status Sync();
  private:
   std::string filename_;
   int fd_;

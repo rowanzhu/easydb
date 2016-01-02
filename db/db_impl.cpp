@@ -7,6 +7,11 @@ namespace easydb {
 
 #define DB_FILE_NAME_LOG_0 "0.log"
 
+static time_t Now()
+{
+    return time(NULL);
+}
+
 Status DB::Open(const Options& options, const std::string& dbname, DB** dbptr)
 {
     *dbptr = NULL;
@@ -31,7 +36,8 @@ DBImpl::DBImpl(const Options& options, const std::string& dbname)
     dbname_(dbname),
     p_log_writer_(NULL),
     p_writable_file_(NULL),
-    max_filename_num_(0)
+    max_filename_num_(0),
+    last_file_sync_ts_(0)
 {
 }
 
@@ -56,6 +62,16 @@ Status DBImpl::Put(const WriteOptions&, const Slice& key, const Slice& value)
     PutLengthPrefixedSlice(&str_record, value);
 
     Status s = p_log_writer_->AddRecord(str_record);
+
+#ifdef EASYDB_FILE_SYNC_ON_DEMAND
+    time_t now = Now();
+    if(now - last_file_sync_ts_  >= options_.file_sync_interval &&
+            s.ok())
+    {
+        s = p_writable_file_->Sync();
+        last_file_sync_ts_ = now;
+    }
+#endif
 
     if(p_writable_file_->GetFileSize() > options_.max_log_file_size)
     {
