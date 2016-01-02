@@ -3,15 +3,11 @@
 #include "file.h"
 #include "coding.h"
 #include "log_reader.h"
+#include "util.h"
 
 namespace easydb {
 
 #define DB_FILE_NAME_LOG_0 "0.log"
-
-static time_t Now()
-{
-    return time(NULL);
-}
 
 Status GetAllFromOneFile(const std::string &file_name, 
         std::map<std::string, std::string> &map_all_kv)

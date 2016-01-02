@@ -17,7 +17,8 @@ SOURCES = \
 	db/file.cpp \
 	db/log_reader.cpp \
 	db/log_writer.cpp \
-	db/status.cpp
+	db/status.cpp \
+	db/util.cpp
 
 CC=cc
 CXX=g++
