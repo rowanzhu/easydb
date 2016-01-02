@@ -7,8 +7,6 @@
 
 namespace easydb {
 
-#define DB_FILE_NAME_LOG_0 "0.log"
-
 Status GetAllFromOneFile(const std::string &file_name, 
         std::map<std::string, std::string> &map_all_kv)
 {
@@ -133,7 +131,7 @@ Status DBImpl::Put(const WriteOptions&, const Slice& key, const Slice& value)
         //rename 0.log
         std::string new_logfile_name;
         GetNewLogFileName(new_logfile_name);
-        GetFullFileName(new_logfile_name);
+        GetFullFileName(dbname_, new_logfile_name);
         s = RenameFile(str_full_log_0_name, new_logfile_name);
         if(!s.ok())
         {
@@ -179,7 +177,6 @@ Status DBImpl::GetAll(std::map<std::string, std::string> &map_all_kv)
         {
             case kLogFile:
             {
-                //SetMaxFilenameNum
                 if(vec_num.size() > 0)
                 {
                     sorted_file_map[vec_num[0]] = &(file_list[i]);
@@ -196,12 +193,12 @@ Status DBImpl::GetAll(std::map<std::string, std::string> &map_all_kv)
     for(iter = sorted_file_map.begin(); iter != sorted_file_map.end(); ++iter)
     {
         std::string *p_str_file_name = iter->second;
-        GetFullFileName(*p_str_file_name);
+        GetFullFileName(dbname_, *p_str_file_name);
         GetAllFromOneFile(*p_str_file_name, map_all_kv);
     }
     
     std::string str_full_log_0_name(DB_FILE_NAME_LOG_0);
-    GetFullFileName(str_full_log_0_name);
+    GetFullFileName(dbname_, str_full_log_0_name);
     GetAllFromOneFile(str_full_log_0_name, map_all_kv);
 
     return s;
@@ -223,7 +220,7 @@ Status DBImpl::Recover()
     }
     
     std::string str_full_log_0_name(DB_FILE_NAME_LOG_0);
-    GetFullFileName(str_full_log_0_name);
+    GetFullFileName(dbname_, str_full_log_0_name);
 
     uint64_t file_size = 0;
     GetFileSize(str_full_log_0_name, &file_size);
@@ -232,7 +229,7 @@ Status DBImpl::Recover()
         //TODO: only rename
         std::string new_logfile_name;
         GetNewLogFileName(new_logfile_name);
-        GetFullFileName(new_logfile_name);
+        GetFullFileName(dbname_, new_logfile_name);
         Status s = RenameFile(str_full_log_0_name, new_logfile_name);
         if(!s.ok())
         {
@@ -305,10 +302,9 @@ void DBImpl::GetNewLogFileName(std::string &ret)
     ret.assign(buff);
 }
 
-void DBImpl::GetFullFileName(std::string &file_name)
+void GetFullFileName(const std::string &dir_name, std::string &file_name)
 {
-    std::string ret;
-    ret.append(dbname_);
+    std::string ret(dir_name);
     ret.append("/");
     ret.append(file_name);
 

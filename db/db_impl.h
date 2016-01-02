@@ -10,6 +10,8 @@ namespace easydb {
 class LogWriter;
 class WritableFile;
 
+#define DB_FILE_NAME_LOG_0 "0.log"
+
 class DBImpl : public DB {
  public:
   DBImpl(const Options& options, const std::string& dbname);
@@ -35,9 +37,10 @@ class DBImpl : public DB {
 
   void ScanDir();
   void GetNewLogFileName(std::string &ret);
-  void GetFullFileName(std::string &file_name);
 };
 
+
+void GetFullFileName(const std::string &dir_name, std::string &file_name);
 
 Status GetAllFromOneFile(const std::string &file_name, 
         std::map<std::string, std::string> &map_all_kv);

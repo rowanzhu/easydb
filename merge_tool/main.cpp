@@ -1,5 +1,7 @@
 #include <cstdio>
 #include <string>
+#include "db/db_impl.h"
+#include "db/util.h"
 
 static std::string str_db_dir;
 
