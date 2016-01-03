@@ -12,7 +12,7 @@ struct Options {
 
     Options()
         :max_log_file_size(104857600), //100M
-        file_sync_interval(0)
+        file_sync_interval(1)
     {
     }
 };

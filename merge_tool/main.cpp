@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        printf("merge success|%u", end - begin);
+        printf("merge success|%u\n", end - begin);
     }
     
     return 0;
