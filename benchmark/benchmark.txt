@@ -11,3 +11,9 @@
 
 10000000 read   time: 431743926 
 1000000  merge
+
+
+
+
+
+src/redis-benchmark -q -n 10000000 -t set -d 320 -r 10000000
