@@ -4,7 +4,7 @@ On linus platform
 Only single process & single thread  
 Real-time write to disk but poor read, especially for backup system  
 
-Example Code: 
+Example Code:    
     DB *p_db = NULL;
     Options opt;
     //opt.max_log_file_size = 100;
