@@ -74,17 +74,17 @@ $(SHARED3):
 
 endif  # PLATFORM_SHARED_EXT
 
-all: $(SHARED) $(LIBRARY)
+all: $(SHARED) $(LIBRARY) merge_tool
 
 clean:
-	rm -f $(LIBRARY) $(SHARED)  */*.o */*/*.o  
+	rm -f $(LIBRARY) $(SHARED)  */*.o */*/*.o  merge_tool/merge_tool
 
 $(LIBRARY): $(LIBOBJECTS)
 	rm -f $@
 	$(AR) -rs $@ $(LIBOBJECTS)
 
-merge_tool: merge_tool/main.o $(LIBOBJECTS) 
-	$(CXX) $(LDFLAGS) merge_tool/main.o $(LIBOBJECTS) -o $@ $(LIBS)
+merge_tool: merge_tool/main.o  merge_tool/merger.o
+	$(CXX) $(LDFLAGS) merge_tool/main.o merge_tool/merger.o $(LIBRARY) -o merge_tool/$@ 
 
 test_1: test/main.o 
 	$(CXX) $(LDFLAGS) test/main.o $(LIBRARY) -o test/$@ 

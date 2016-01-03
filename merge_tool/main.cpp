@@ -1,9 +1,8 @@
 #include <cstdio>
-#include <string>
-#include "db/db_impl.h"
+#include "merger.h"
 #include "db/util.h"
 
-static std::string str_db_dir;
+using namespace easydb;
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +12,20 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    str_db_dir.assign(argv[1]);
+    Merger merger(argv[1]);
+    
+    time_t begin = Now();
+    int ret = merger.Merge();
+    time_t end = Now();
+
+    if(0 != ret)
+    {
+        printf("merge failed|%d\n", ret);
+    }
+    else
+    {
+        printf("merge success|%u", end - begin);
+    }
     
     return 0;
 }

@@ -1,4 +1,10 @@
 #include "merger.h"
+#include "db/db_impl.h"
+#include "db/util.h"
+#include "db/file.h"
+#include "db/log_writer.h"
+#include "db/log_reader.h"
+#include "db/coding.h"
 
 namespace easydb
 {
@@ -16,12 +22,27 @@ Merger::~Merger()
 
 int Merger::Merge()
 {
-    int ret = 0;
-    ret = SelectFile();
-    ret = MergeToMap();
-    ret = WriteToFile();
+    if(0 != SelectFile())
+    {
+        return -1;
+    }
+    
+    if(map_selected_file_.size() < 2)
+    {
+        return 0;
+    }
+    
+    if(0 != MergeToMap())
+    {
+        return -2;
+    }
+    
+    if(0 != WriteToFile())
+    {
+        return -3;
+    }
 
-    return ret;
+    return 0;
 }
 
 int Merger::SelectFile()
@@ -76,7 +97,82 @@ int Merger::MergeToMap()
 
 int Merger::WriteToFile()
 {
+    //1. write to mgi file
+    std::string full_mgi_name;
+    GetMergeFileName(full_mgi_name, "mgi");
+
+    //scope for release
+    {
+        WritableFile writable_file(full_mgi_name);
+        if(!writable_file.IsValid())
+        {
+            printf("open file failed|%s\n", full_mgi_name.c_str());
+            return -1;
+        }
+        LogWriter log_writer(&writable_file);
+
+        std::map<std::string, std::string>::iterator iter;
+        for(iter = map_kv_.begin(); iter != map_kv_.end(); ++iter)
+        {
+            std::string str_record;
+            str_record.push_back(static_cast<char>(kTypeValue));
+            PutLengthPrefixedSlice(&str_record, iter->first);
+            PutLengthPrefixedSlice(&str_record, iter->second);
+
+            Status s = log_writer.AddRecord(str_record);
+            if(!s.ok())
+            {
+                printf("Merger::WriteToFile|%s\n", s.ToString().c_str());
+                return -1;
+            }
+        }
+
+        writable_file.Sync();
+    }
+
+    //2. rename mgi to mgd
+    std::string full_mgd_name;
+    GetMergeFileName(full_mgd_name, "mgd");
+    RenameFile(full_mgi_name, full_mgd_name);
+
+    //3. delete old log file
+    std::map<uint32_t, std::string>::iterator iter;
+    for(iter = map_selected_file_.begin(); iter != map_selected_file_.end(); ++iter)
+    {
+        DeleteFile(iter->second);
+    }
+
+    //4. rename mgd to min.log
+    std::string full_log_name;
+    GetLogFileName(full_log_name);
+    RenameFile(full_mgd_name, full_log_name);
+
     return 0;
+}
+
+void Merger::GetMergeFileName(std::string &full_name, const std::string &suffix)
+{
+    full_name.clear();
+    uint32_t min_num = map_selected_file_.begin()->first;
+    uint32_t max_num = (--map_selected_file_.end())->first;
+
+    char buff[256] = {0};
+    snprintf(buff, sizeof(buff), "%u_%u.%s", min_num, max_num, suffix.c_str());
+
+    full_name.assign(buff);
+    GetFullFileName(dbname_, full_name);
+}
+
+void Merger::GetLogFileName(std::string &full_name)
+{
+    full_name.clear();
+    uint32_t min_num = map_selected_file_.begin()->first;
+
+    char buff[256] = {0};
+    snprintf(buff, sizeof(buff), "%u.log", min_num);
+
+    full_name.assign(buff);
+    GetFullFileName(dbname_, full_name);
 }
 
 }
