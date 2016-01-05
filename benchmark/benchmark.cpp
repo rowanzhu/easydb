@@ -9,7 +9,7 @@ int BenchmarkWrite()
     DB *p_db = NULL;
     Options opt;
     //opt.max_log_file_size = 100;
-    opt.file_sync_interval = 1;
+    opt.file_sync_interval = 0;
     Status s = DB::Open(opt, "./db_test", &p_db);
 
     if(NULL == p_db)
@@ -20,7 +20,7 @@ int BenchmarkWrite()
 
     uint64_t begin = NowMicros();
 
-    for(int i = 0; i < 1000000; ++i)
+    for(int i = 0; i < 10000; ++i)
     {
         char key[64] = {0};
         char value[256] = {0};
