@@ -1,3 +1,4 @@
+----------------------------notebook test------------------------------------
 10000 64+256 time: 920238005 -> 0.0920238 sec/op    10.8 op/sec
              time: 447460985 -> 0.0447460 sec/op    22 op/sec
 1s           time: 159157                           62831 op/sec
@@ -27,10 +28,3 @@ src/redis-benchmark -q -n 10000000 -t set -d 320 -r 10000000 (RDB off, AOF on & 
 SET: 93516.50 requests per second
 (Asynchronous AOF fsync is taking too long (disk is busy?). Writing the AOF
 buffer without waiting for fsync to complete, this may slow down Redis.)
-
-
-RES: 283m 
-mem: 8G
-cpu: Intel(R) Xeon(R) CPU E5-2640 0 @ 2.50GHz 4核
-disk: 100G
-
