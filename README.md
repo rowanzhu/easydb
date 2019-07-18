@@ -1,5 +1,5 @@
 # easydb
-A simple key-value database  
+A simple key-value database based on leveldb
 On linus platform  
 Only single process & single thread  
 Real-time write to disk but poor read, especially for backup system  
